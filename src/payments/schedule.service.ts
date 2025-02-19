@@ -107,7 +107,7 @@ export class SchedulePaymentService {
     }
 
     // Run daily at 2AM, for example
-    @Cron(CronExpression.EVERY_DAY_AT_2AM)
+    @Cron(CronExpression.EVERY_DAY_AT_10PM)
     async handleRecurrentPayments() {
       this.logger.log('Running recurrent payment check...');
 
@@ -133,7 +133,6 @@ export class SchedulePaymentService {
             const result = await this.paymentService.chargeRecurrent(
               order.recurrentToken,
               amount,
-               // or any unique ID recognized by your payment gateway
             );
 
             if (result.status === 'success') {

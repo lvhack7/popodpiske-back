@@ -15,8 +15,7 @@ export class AdminController {
     constructor(private readonly adminService: AdminService,
     ) {}
 
-    //@Roles(Role.Admin)
-    @Public()
+    @Roles(Role.Admin)
     @Post("register")
     async registerAdmin(@Body() dto: RegisterAdminDto) {
         return await this.adminService.register(dto);
