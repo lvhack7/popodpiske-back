@@ -34,7 +34,6 @@ export class PaymentsService {
           amount,
           order_id: uuidv4(),
           description: 'Оплата за курс', 
-          test_mode: 1
         };
         console.log(body)
     
