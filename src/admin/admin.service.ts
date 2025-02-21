@@ -40,7 +40,7 @@ export class AdminService {
         console.log("DTO, ", dto)
         const admin = await this.adminModel.findOne({ where: { login: dto.login } })
         if (admin) {
-            throw new BadRequestException("Пользователь уже существует")
+            throw new BadRequestException("Пользователь под логином уже существует")
         }
         
         const hashedPassword = await bcrypt.hash(dto.password, 5)
@@ -99,6 +99,20 @@ export class AdminService {
             include: {all: true},
             order: [['id', 'ASC']],
         })
+    }
+
+    async removeAdmin(adminId: number) {
+        const admin = await this.adminModel.findByPk(adminId, {include: {all: true}})
+        if (!admin) {
+            throw new BadRequestException("Пользователь не найден")
+        }
+
+        const hasAdminRole = admin.roles.some(role => role.value === "ADMIN");
+        if (hasAdminRole) {
+            throw new BadRequestException("Нельзя удалить пользователя с ролью ADMIN");
+        }
+
+        await admin.destroy()
     }
 
     private async generateTokens(admin: Admin) {

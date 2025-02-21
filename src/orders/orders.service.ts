@@ -41,6 +41,7 @@ export class OrdersService {
             defaults: {
               ...dto, // Spread other values here for creating a new record
               remainingMonth: dto.numberOfMonths,
+              totalPrice: link.course.totalPrice,
               paymentId,
               linkId: link.id,
               nextBillingDate: currentDate,

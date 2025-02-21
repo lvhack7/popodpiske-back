@@ -61,6 +61,6 @@ export class PaymentLinkService {
     }
 
     async getPaymentLinksByUUID(uuid: string) {
-        return await this.paymentLinkModel.findOne({ where: { uuid }, include: {all: true} });
+        return await this.paymentLinkModel.findOne({ where: { uuid }, include: [{all: true, nested: true}] });
     }
 }

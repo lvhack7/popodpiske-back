@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Request, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Request, Res, UseGuards } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { Response } from 'express';
 import { Roles } from 'src/common/decorators/roles.decorator';
@@ -15,7 +15,8 @@ export class AdminController {
     constructor(private readonly adminService: AdminService,
     ) {}
 
-    @Roles(Role.Admin)
+    //@Roles(Role.Admin)
+    @Public()
     @Post("register")
     async registerAdmin(@Body() dto: RegisterAdminDto) {
         return await this.adminService.register(dto);
@@ -51,6 +52,12 @@ export class AdminController {
             accessToken: data.accessToken,
             user: data.admin
         }
+    }
+
+    @Roles(Role.Admin)
+    @Delete("/:id")
+    async removeAdmin(@Param('id') adminId: number) {
+        return await this.adminService.removeAdmin(adminId)
     }
 
     @Roles(Role.Admin)

@@ -5,6 +5,7 @@ import { Payment } from "src/payments/model/payment.model";
 
 
 export interface OrderCreationAttrs {
+    totalPrice: number;
     numberOfMonths: number;
     monthlyPrice: number;
     nextBillingDate?: string;
@@ -20,6 +21,9 @@ export interface OrderCreationAttrs {
 export class Order extends Model<Order, OrderCreationAttrs> {
     @Column({type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true})
     id: number
+
+    @Column({type:  DataType.DECIMAL(10, 2), allowNull: false})
+    totalPrice: number
 
     @Column({type: DataType.INTEGER, allowNull: false})
     numberOfMonths: number

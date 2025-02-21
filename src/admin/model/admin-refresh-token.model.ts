@@ -21,6 +21,6 @@ export class AdminRefreshToken extends Model<AdminRefreshToken, AdminRefreshToke
     @Column({type: DataType.INTEGER, allowNull: false})
     adminId: number
     
-    @BelongsTo(() => Admin)
+    @BelongsTo(() => Admin, {onDelete: 'CASCADE'})
     admin: Admin
 }

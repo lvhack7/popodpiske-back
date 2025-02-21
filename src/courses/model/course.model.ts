@@ -26,7 +26,7 @@ export class Course extends Model<Course, CourseCreationAttrs> {
         type: DataType.DECIMAL(10, 2),
         allowNull: false,
     })
-    totalPrice: string;
+    totalPrice: number;
 
     @HasMany(() => PaymentLink)
     links: PaymentLink[];

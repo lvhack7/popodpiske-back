@@ -1,6 +1,7 @@
 import { Table, Column, Model, DataType, HasMany, BelongsTo, BelongsToMany } from 'sequelize-typescript';
 import { AdminRole } from 'src/roles/model/admin-role.model';
 import { Roles } from 'src/roles/model/role.model';
+import { AdminRefreshToken } from './admin-refresh-token.model';
 
 
 export interface AdminCreationAttrs {
@@ -31,4 +32,7 @@ export class Admin extends Model<Admin> {
 
     @BelongsToMany(() => Roles, () => AdminRole)
     roles: Roles[];
+
+    @HasMany(() => AdminRefreshToken, {onDelete: 'CASCADE'})
+    tokens: AdminRefreshToken[]
 }
