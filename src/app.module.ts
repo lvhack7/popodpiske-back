@@ -49,7 +49,7 @@ import { ResetToken } from './sms/model/reset-tokens.model';
           database,
           autoLoadModels: true,
           synchronize: true,
-          sync: { alter: true },
+          //sync: { alter: true },
           models: [User, Order, Roles, SMSCodes, AdminRole, Admin, RefreshToken, Payment, PaymentLink, ResetToken, AdminRefreshToken, Course],
         };
       },
