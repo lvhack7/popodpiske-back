@@ -10,6 +10,7 @@ import { PaymentsService } from 'src/payments/payments.service';
 import { v4 as uuidv4 } from 'uuid';
 import { PaymentLinkService } from 'src/links/links.service';
 import { getNextBillingDate } from 'src/common/utils';
+import { SmsService } from 'src/sms/sms.service';
 
 
 @Injectable()
@@ -22,12 +23,20 @@ export class OrdersService {
         private readonly userService: UsersService,
         private readonly configService: ConfigService,
         private readonly linkService: PaymentLinkService,
-        private readonly paymentService: PaymentsService
+        private readonly paymentService: PaymentsService,
+        private readonly smsService: SmsService
     ) {}
 
     async createOrder(dto: CreateOrderDto, userId: number) {
         const user = await this.userService.getUserById(userId)
         const link = await this.linkService.getPaymentLinksByUUID(dto.linkUUID)
+
+        const smsVerified = await this.smsService.findVerified(user.phone)
+        if (!smsVerified) {
+            throw new BadRequestException("Телефон не был подтвержден!")
+        }
+
+        await this.smsService.removePhone(user.phone)
         
         const paymentId = uuidv4()
         const currentDate = new Date().toISOString().split('T')[0];

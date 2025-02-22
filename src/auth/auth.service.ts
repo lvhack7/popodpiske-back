@@ -45,6 +45,11 @@ export class AuthService {
             throw new BadRequestException("Пользователь уже существует")
         }
 
+        const smsVerified = await this.smsService.findVerified(dto.phone)
+        if (!smsVerified) {
+            throw new BadRequestException("Телефон не был подтвержден!")
+        }
+
         const hashedPassword = await bcrypt.hash(dto.password, 5)
         
         const newUser = await this.userService.createUser({

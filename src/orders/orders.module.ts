@@ -8,12 +8,14 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from 'src/users/users.module';
 import { PaymentsModule } from 'src/payments/payments.module';
 import { LinksModule } from 'src/links/links.module';
+import { SmsModule } from 'src/sms/sms.module';
 
 @Module({
   imports: [SequelizeModule.forFeature([Order, PaymentLink]),
   ConfigModule,
   UsersModule,
   PaymentsModule,
+  SmsModule,
   LinksModule
   ],
   providers: [OrdersService],

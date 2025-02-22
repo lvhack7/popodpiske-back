@@ -64,12 +64,23 @@ export class SmsService {
         const expiresAt = new Date();
         expiresAt.setMinutes(expiresAt.getMinutes() + 15);
 
+        record.verified = true
+        await record.save()
+
         const resetToken = await this.resetTokensModel.create({
             phone,
             expiresAt
         })
 
         return resetToken
+    }
+
+    async findVerified(phone: string) {
+        return await this.smsVerificationModel.findOne({where: {phone, verified: true}})
+    }
+
+    async removePhone(phone: string) {
+        await this.smsVerificationModel.destroy({ where: {phone} })
     }
 
     async getRecordByToken(token: string) {

@@ -20,6 +20,9 @@ export class SMSCodes extends Model<SMSCodes, SMSCodesCreationAttrs> {
     @Column({type: DataType.UUID, defaultValue: DataType.UUIDV4})
     token: string
 
+    @Column({type: DataType.BOOLEAN, defaultValue: false})
+    verified: boolean
+
     @Column({ type: DataType.DATE, allowNull: false })
     expiresAt: Date;
 
