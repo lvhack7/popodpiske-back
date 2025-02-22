@@ -23,6 +23,7 @@ import { CoursesModule } from './courses/courses.module';
 import { Course } from './courses/model/course.model';
 import { ResetToken } from './sms/model/reset-tokens.model';
 
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -57,6 +58,5 @@ import { ResetToken } from './sms/model/reset-tokens.model';
     }),
     UsersModule, AuthModule, OrdersModule, PaymentsModule, RolesModule, SmsModule, AdminModule, LinksModule, CoursesModule],
   controllers: [],
-  providers: [],
 })
 export class AppModule {}
