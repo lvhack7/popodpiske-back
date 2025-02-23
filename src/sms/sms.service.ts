@@ -26,7 +26,8 @@ export class SmsService {
     
         const login = process.env.SMS_LOGIN; // Replace with your SMSC.kz login
         const password = process.env.SMS_PASSWORD; // Replace with your SMSC.kz password
-        const url = `https://smsc.kz/sys/send.php?login=${login}&psw=${password}&phones=${phone.replace("+", "")}&mes=${encodeURIComponent(message)}`;
+        const sender = process.env.SMS_SENDER;
+        const url = `https://smsc.kz/sys/send.php?login=${login}&psw=${password}&phones=${phone.replace("+", "")}&mes=${encodeURIComponent(message)}&sender=${sender}`;
 
         try {
             const response = await axios.get(url);
