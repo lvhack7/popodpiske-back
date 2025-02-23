@@ -24,8 +24,8 @@ export class SmsService {
         const code = this.generateCode();
         const message = `Ваш код подтверждения: ${code}`;
     
-        const login = 'Skypay'; // Replace with your SMSC.kz login
-        const password = 'Skypay2024!'; // Replace with your SMSC.kz password
+        const login = process.env.SMS_LOGIN; // Replace with your SMSC.kz login
+        const password = process.env.SMS_PASSWORD; // Replace with your SMSC.kz password
         const url = `https://smsc.kz/sys/send.php?login=${login}&psw=${password}&phones=${phone.replace("+", "")}&mes=${encodeURIComponent(message)}`;
 
         try {
