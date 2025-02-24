@@ -13,7 +13,7 @@ export class SmsController {
     ) {}
 
     @Public()
-    //@Throttle({ default: { limit: 1, ttl: 60000 } })
+    @Throttle({ default: { limit: 1, ttl: 60000 } })
     @UseFilters(SmsRateLimitExceptionFilter)
     @Post('send')
     async sendCode(@Body('phone') phone: string) {
