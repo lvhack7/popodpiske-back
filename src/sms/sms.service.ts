@@ -22,12 +22,15 @@ export class SmsService {
 
     async sendVerificationCode(phone: string) {
         const code = this.generateCode();
-        const message = `Ваш код подтверждения: ${code}`;
+        const message = `Popodpiske. Ваш код подтверждения: ${code}`;
     
         const login = process.env.SMS_LOGIN; // Replace with your SMSC.kz login
         const password = process.env.SMS_PASSWORD; // Replace with your SMSC.kz password
         const sender = process.env.SMS_SENDER;
-        const url = `https://smsc.kz/sys/send.php?login=${login}&psw=${password}&phones=${phone.replace("+", "")}&mes=${encodeURIComponent(message)}&sender=${sender}`;
+
+        console.log(login, password, sender)
+
+        const url = `https://smsc.kz/sys/send.php?login=${login}&psw=${password}&phones=${phone.replace("+", "")}&mes=${encodeURIComponent(message)}`;
 
         try {
             const response = await axios.get(url);
@@ -42,6 +45,7 @@ export class SmsService {
             await this.smsVerificationModel.create({ phone, code, expiresAt });
             return { message: 'Код успешно отправлен'};
         } catch (error) {
+            console.log(error)
             throw new HttpException(
                 'Не удалось отправить СМС. Попробуйте еще раз.',
                 HttpStatus.INTERNAL_SERVER_ERROR,
