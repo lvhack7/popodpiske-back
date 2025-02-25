@@ -37,7 +37,7 @@ export class SmsService {
             }
 
             const expiresAt = new Date();
-            expiresAt.setMinutes(expiresAt.getSeconds() + 90); // Code expires in 1 minute
+            expiresAt.setMinutes(expiresAt.getSeconds() + 80); // Code expires in 1 minute
 
             this.logger.log("The code is: " + code)
             await this.removePhone(phone)
