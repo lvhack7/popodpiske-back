@@ -26,9 +26,7 @@ export class SmsService {
     
         const login = process.env.SMS_LOGIN; // Replace with your SMSC.kz login
         const password = process.env.SMS_PASSWORD; // Replace with your SMSC.kz password
-        const sender = process.env.SMS_SENDER;
-
-        console.log(login, password, sender)
+        //const sender = process.env.SMS_SENDER;
 
         const url = `https://smsc.kz/sys/send.php?login=${login}&psw=${password}&phones=${phone.replace("+", "")}&mes=${encodeURIComponent(message)}`;
 
@@ -39,9 +37,10 @@ export class SmsService {
             }
 
             const expiresAt = new Date();
-            expiresAt.setMinutes(expiresAt.getMinutes() + 1); // Code expires in 1 minute
+            expiresAt.setMinutes(expiresAt.getSeconds() + 90); // Code expires in 1 minute
 
             this.logger.log("The code is: " + code)
+            await this.removePhone(phone)
             await this.smsVerificationModel.create({ phone, code, expiresAt });
             return { message: 'Код успешно отправлен'};
         } catch (error) {
