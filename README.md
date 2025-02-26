@@ -91,7 +91,7 @@ npm run start:dev
 
 Swagger документация доступна по адресу:
 
-[http://localhost:3000/api-docs](http://localhost:3000/api-docs)
+[http://localhost:5002/docs](http://localhost:5002/docs)
 
 **Для доступа к Swagger UI используйте следующие учетные данные:**
 
