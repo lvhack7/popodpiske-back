@@ -1,73 +1,102 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Popodpiske API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+**Краткое описание проекта:**  
+Данный проект представляет собой backend-сервис, созданный с использованием NestJS и Sequelize ORM c использованем Postgre SQL базы данных.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Описание
 
-## Description
+В этом проекте реализована архитектура REST API с использованием NestJS. Проект включает:
+- Аутентификацию и авторизацию пользователей
+- Подписки, Ссылки, СМС, Курсы, Платежы
+- Админ возможности
+- Документацию API через Swagger
+- Интеграцию с базой данных PostgreSQL через Sequelize
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Предпосылки
 
-## Installation
+Перед запуском убедитесь, что у вас установлены:
+- [Node.js](https://nodejs.org/) (версия 22 или выше)
+- [npm](https://www.npmjs.com/) (версия 10 или выше)
 
-```bash
-$ npm install
+## Установка
+
+1. **Клонируйте репозиторий:**
+
+   ```bash
+   git clone https://github.com/relitalkschool/popodpiske-api.git
+   ```
+
+2. **Перейдите в директорию проекта:**
+
+   ```bash
+   cd popodpiske-api
+   ```
+
+3. **Установите зависимости:**
+
+   ```bash
+   npm install
+   ```
+
+## Настройка окружения
+
+Создайте в корневой папке проекта файл `.env` и настройте переменные окружения. Пример файла `.env`:
+
+```env
+DATABASE_HOST=localhost
+DATABASE_NAME=postgres
+DATABASE_PORT=5432
+DATABASE_USER=postgres
+DATABASE_PASSWORD=password
+JWT_ACCESS_SECRET=...
+JWT_REFRESH_SECRET=...
+PAYSAGE_API_KEY=...
+PAYSAGE_SECRET_KEY=...
+PAYSAGE_MERCHANT_ID=...
+PAYSAGE_SERVICE_ID=...
+PAYSAGE_MERCHANT_NAME=...
+SMS_LOGIN=...
+SMS_PASSWORD=...
+SMS_SENDER=...
+NODE_ENV=development
 ```
 
-## Running the app
+## Запуск проекта
+
+### Режим разработки
+
+Запустите приложение в режиме разработки:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run start:dev
 ```
 
-## Test
+Приложение будет доступно по адресу: [http://localhost:5002](http://localhost:5002)
 
-```bash
-# unit tests
-$ npm run test
+### Продакшен сборка
 
-# e2e tests
-$ npm run test:e2e
+1. Соберите проект:
 
-# test coverage
-$ npm run test:cov
-```
+   ```bash
+   npm run build
+   ```
 
-## Support
+2. Запустите собранное приложение:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+   ```bash
+   npm run start:prod
+   ```
 
-## Stay in touch
+## Документация API
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Swagger документация доступна по адресу:
 
-## License
+[http://localhost:3000/api-docs](http://localhost:3000/api-docs)
 
-Nest is [MIT licensed](LICENSE).
+**Для доступа к Swagger UI используйте следующие учетные данные:**
+
+- **Логин:** admin  
+- **Пароль:** popodpiskeDocs2025!
+
+> **Примечание:** Для доступа к Swagger UI может быть настроена базовая авторизация или Bearer-токен (см. документацию проекта).
+

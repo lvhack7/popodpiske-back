@@ -34,7 +34,7 @@ export class SmsController {
   }
 
   @Public()
-  @Throttle({ default: { limit: 7, ttl: 60000 } })
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @UseFilters(SmsRateLimitExceptionFilter)
   @Post('verify')
   @ApiOperation({
