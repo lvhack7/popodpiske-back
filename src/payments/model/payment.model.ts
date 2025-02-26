@@ -1,4 +1,5 @@
 // src/models/payment.model.ts
+import { ApiProperty } from '@nestjs/swagger';
 import {
     Table,
     Column,
@@ -21,56 +22,60 @@ interface PaymentCreationAttrs {
 
 @Table({ tableName: 'payments' })
 export class Payment extends Model<Payment, PaymentCreationAttrs> {
-    @Column({
-        type: DataType.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-    })
-    id: number;
+  
+  @ApiProperty({ description: 'Уникальный идентификатор платежа', example: 1 })
+  @Column({
+    type: DataType.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  })
+  id: number;
 
-    @ForeignKey(() => Order)
-    @Column({
-        type: DataType.INTEGER,
-        allowNull: false,
-    })
-    orderId: number;
+  @ApiProperty({ description: 'Идентификатор заказа, к которому относится платеж', example: 123 })
+  @ForeignKey(() => Order)
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+  })
+  orderId: number;
 
-    @BelongsTo(() => Order)
-    order: Order;
+  @ApiProperty({ description: 'Заказ, связанный с платежом', type: () => Order })
+  @BelongsTo(() => Order)
+  order: Order;
 
-    // Total amount charged for this payment
-    @Column({
-        type: DataType.DECIMAL(10, 2),
-        allowNull: false,
-    })
-    amount: number;
+  @ApiProperty({ description: 'Общая сумма платежа', example: 1500.50 })
+  @Column({
+    type: DataType.DECIMAL(10, 2),
+    allowNull: false,
+  })
+  amount: number;
 
-    // Currency used
-    @Column({
-        type: DataType.STRING,
-        defaultValue: 'KZT',
-    })
-    currency: string;
+  @ApiProperty({ description: 'Валюта платежа', example: 'KZT' })
+  @Column({
+    type: DataType.STRING,
+    defaultValue: 'KZT',
+  })
+  currency: string;
 
-    // Current status: e.g. "paid", "failed", "pending", etc.
-    @Column({
-        type: DataType.STRING,
-        defaultValue: 'pending',
-    })
-    status: string;
+  @ApiProperty({ description: 'Статус платежа (например, "paid", "failed", "pending")', example: 'pending' })
+  @Column({
+    type: DataType.STRING,
+    defaultValue: 'pending',
+  })
+  status: string;
 
-    // Date/time when the payment was processed
-    @Column({
-        type: DataType.DATE,
-        allowNull: false,
-        defaultValue: DataType.NOW,
-    })
-    paymentDate: Date;
+  @ApiProperty({ description: 'Дата и время проведения платежа', example: '2025-02-25T12:00:00Z' })
+  @Column({
+    type: DataType.DATE,
+    allowNull: false,
+    defaultValue: DataType.NOW,
+  })
+  paymentDate: Date;
 
-    // A transaction ID or reference from the payment gateway
-    @Column({
-        type: DataType.STRING,
-        allowNull: true,
-    })
-    transactionId?: string;
+  @ApiProperty({ description: 'Идентификатор транзакции платежного шлюза', example: 'trans-123456', required: false })
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  transactionId?: string;
 }

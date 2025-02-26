@@ -2,6 +2,7 @@ import { BelongsTo, Column, DataType, ForeignKey, HasMany, Model, Table } from "
 import { User } from "src/users/model/user.model";
 import { PaymentLink } from "../../links/model/payment-link.model";
 import { Payment } from "src/payments/model/payment.model";
+import { ApiProperty } from "@nestjs/swagger";
 
 
 export interface OrderCreationAttrs {
@@ -19,47 +20,62 @@ export interface OrderCreationAttrs {
 
 @Table({ tableName: 'order', timestamps: true })
 export class Order extends Model<Order, OrderCreationAttrs> {
-    @Column({type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true})
-    id: number
+  
+  @ApiProperty({ example: 1, description: 'Уникальный идентификатор заказа' })
+  @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
+  id: number;
 
-    @Column({type:  DataType.DECIMAL(10, 2), allowNull: true})
-    totalPrice: number
+  @ApiProperty({ example: 4500, description: 'Общая стоимость заказа' })
+  @Column({ type: DataType.DECIMAL(10, 2), allowNull: true })
+  totalPrice: number;
 
-    @Column({type: DataType.INTEGER, allowNull: false})
-    numberOfMonths: number
+  @ApiProperty({ example: 3, description: 'Количество месяцев заказа' })
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  numberOfMonths: number;
 
-    @Column({type: DataType.DECIMAL(10, 2), allowNull: false})
-    monthlyPrice: number
+  @ApiProperty({ example: 1500, description: 'Ежемесячная стоимость заказа' })
+  @Column({ type: DataType.DECIMAL(10, 2), allowNull: false })
+  monthlyPrice: number;
 
-    @Column({type: DataType.TEXT, allowNull: false, defaultValue: 'active'})
-    status: string
+  @ApiProperty({ example: 'active', description: 'Статус заказа' })
+  @Column({ type: DataType.TEXT, allowNull: false, defaultValue: 'active' })
+  status: string;
 
-    @Column({type: DataType.TEXT, allowNull: true})
-    recurrentToken: string
+  @ApiProperty({ example: 'some-recurrent-token', description: 'Рекуррентный токен заказа' })
+  @Column({ type: DataType.TEXT, allowNull: true })
+  recurrentToken: string;
 
-    @Column({type: DataType.INTEGER, allowNull: false})
-    remainingMonth: number
+  @ApiProperty({ example: 1, description: 'Количество оставшихся месяцев заказа' })
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  remainingMonth: number;
 
-    @Column({type: DataType.DATEONLY, allowNull: true})
-    nextBillingDate: string
+  @ApiProperty({ example: '2025-02-28', description: 'Дата следующего списания' })
+  @Column({ type: DataType.DATEONLY, allowNull: true })
+  nextBillingDate: string;
 
-    @Column({type: DataType.TEXT, allowNull: true})
-    paymentId: string
+  @ApiProperty({ example: 'pay-123456', description: 'Идентификатор платежа' })
+  @Column({ type: DataType.TEXT, allowNull: true })
+  paymentId: string;
 
-    @ForeignKey(() => User)
-    @Column({type: DataType.INTEGER, allowNull: false})
-    userId: number
+  @ApiProperty({ example: 1, description: 'Идентификатор пользователя' })
+  @ForeignKey(() => User)
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  userId: number;
 
-    @BelongsTo(() => User)
-    user: User
+  @ApiProperty({ description: 'Пользователь, связанный с заказом', type: () => User })
+  @BelongsTo(() => User)
+  user: User;
 
-    @ForeignKey(() => PaymentLink)
-    @Column({type: DataType.INTEGER, allowNull: false})
-    linkId: number
+  @ApiProperty({ example: 4, description: 'Идентификатор ссылки оплаты' })
+  @ForeignKey(() => PaymentLink)
+  @Column({ type: DataType.INTEGER, allowNull: false })
+  linkId: number;
 
-    @BelongsTo(() => PaymentLink)
-    link: PaymentLink
+  @ApiProperty({ description: 'Ссылка оплаты, связанная с заказом', type: () => PaymentLink })
+  @BelongsTo(() => PaymentLink)
+  link: PaymentLink;
 
-    @HasMany(() => Payment)
-    payments: Payment[]
+  @ApiProperty({ description: 'Список платежей, связанных с заказом', type: () => [Payment] })
+  @HasMany(() => Payment)
+  payments: Payment[];
 }

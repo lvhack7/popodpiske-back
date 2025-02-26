@@ -10,13 +10,11 @@ export class RolesController {
         private readonly rolesService: RolesService
     ) {}
 
-    @Public()
     @Post()
     async createRole(@Body() dto: CreateRoleDto) {
         return await this.rolesService.createRole(dto)
     }
 
-    @Public()
     @Get()
     async getRoles() {
         return await this.rolesService.getAllRoles()

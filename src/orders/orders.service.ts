@@ -36,8 +36,6 @@ export class OrdersService {
             throw new BadRequestException("Телефон не был подтвержден!")
         }
 
-        await this.smsService.removePhone(user.phone)
-        
         const paymentId = uuidv4()
         const currentDate = new Date().toISOString().split('T')[0];
 
@@ -87,10 +85,12 @@ export class OrdersService {
             throw new BadRequestException("Ссылка не найдена")
         }
 
-        const order = await this.orderModel.findOne({where: {linkId: link.id}})
+        const order = await this.orderModel.findOne({where: {linkId: link.id}, include: {all: true}})
         if (!order) {
             throw new BadRequestException("Заказ не найден")
         }
+
+        await this.smsService.removePhone(order.user.phone)
 
         order.status = 'active'
         order.remainingMonth -= 1
