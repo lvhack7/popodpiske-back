@@ -107,6 +107,8 @@ export class OrdersService {
             currency: 'KZT',
             paymentDate: new Date(),
         })
+        // {   "data": "eyJwYXltZW50X2lkIjo4Nzk0NDExODczMDMyNDI5Mywib3BlcmF0aW9uX2lkIjo4Nzk0NDE1NDQ5OTI4MzI2OSwib3JkZXJfaWQiOiI2ZmVhZTljNi0xN2ZkLTQ1MjAtYTE4OS0xNDBjODBhMDU3ZTUiLCJwYXltZW50X3R5cGUiOiJwYXkiLCJvcGVyYXRpb25fdHlwZSI6IndpdGhkcmF3Iiwib3BlcmF0aW9uX3N0YXR1cyI6ImVycm9yIiwiZXJyb3JfY29kZSI6InByb3ZpZGVyX2luY29ycmVjdF9yZXNwb25zZV9mb3JtYXQiLCJhbW91bnQiOjgzLjQyLCJhbW91bnRfaW5pdGlhbCI6ODMuNDIsImNyZWF0ZWRfZGF0ZSI6IjIwMjUtMDItMjYgMTY6NDY6NDAuODk5MDQ1ICswMDAwIFVUQyIsInBheW1lbnRfZGF0ZSI6IjIwMjUtMDItMjYgMTY6NDY6MTkgKzAwMDAgVVRDIiwicGF5ZXJfaW5mbyI6eyJwYW5fbWFza2VkIjoiNDUxNzA3KioqKioqNTQ5OCIsImhvbGRlciI6IiIsImVtYWlsIjoiIiwicGhvbmUiOiIrNzc3NzA2MDg4ODgifSwiZXh0cmFfcGFyYW1zIjoie30iLCJwaG9uZV9udW1iZXIiOiIifQ==",   
+        //     "sign": "540e435880a811765105d49f7cbe8bdf6cc2935aa34559a6c7f619a5affe1828470f58ab26c59528b24a627163a73cdc55fdc14a9beeee9a1de18ab1444e064b" }
     }
 
     async cancelOrder(orderId: number, userId: number) {
