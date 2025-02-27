@@ -155,6 +155,7 @@ export class SchedulePaymentService {
                   // No more installments needed.
                   order.status = 'completed';
                   order.nextBillingDate = null; // or leave a final record as needed.
+                  order.recurrentToken = null;
                 } else {
                   // Payment succeeded – set status to active, regardless of previous status.
                   order.status = 'active';
@@ -166,6 +167,7 @@ export class SchedulePaymentService {
                 order.remainingMonth = 0;
                 order.status = 'completed';
                 order.nextBillingDate = null;
+                order.recurrentToken = null;
               }
 
               await order.save();

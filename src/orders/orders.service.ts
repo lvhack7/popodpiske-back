@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Order } from './model/order.model';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UsersService } from 'src/users/users.service';
-import axios from 'axios';
+import axios, { all } from 'axios';
 import * as crypto from 'crypto';
 import { ConfigService } from '@nestjs/config';
 import { PaymentsService } from 'src/payments/payments.service';
@@ -31,35 +31,26 @@ export class OrdersService {
         const user = await this.userService.getUserById(userId)
         const link = await this.linkService.getPaymentLinksByUUID(dto.linkUUID)
 
+        if (!link) {
+            throw new BadRequestException("Ссылка не найдена")
+        }
+
         const smsVerified = await this.smsService.findVerified(user.phone)
         if (!smsVerified) {
             throw new BadRequestException("Телефон не был подтвержден!")
         }
 
         const paymentId = uuidv4()
-        const currentDate = new Date().toISOString().split('T')[0];
 
-        const [order, created] = await this.orderModel.findOrCreate({
-            where: {
-              // Add the condition that uniquely identifies the record you're searching for
-              userId, 
-              linkId: link.id,
-            },
-            defaults: {
-              ...dto, // Spread other values here for creating a new record
-              remainingMonth: dto.numberOfMonths,
-              totalPrice: link.course.totalPrice,
-              paymentId,
-              linkId: link.id,
-              nextBillingDate: currentDate,
-              status: 'pending',
-            },
+        const order = await this.orderModel.create({
+            ...dto, // Spread other values here for creating a new record
+            userId, 
+            linkId: link.id,
+            remainingMonth: dto.numberOfMonths,
+            totalPrice: link.course.totalPrice,
+            paymentId,
+            status: 'pending',
         });
-
-        if (created) {
-            order.paymentId = paymentId
-            await order.save()
-        }
 
         const data = await this.generatePaymentLink(
             link.course.courseName,
@@ -68,7 +59,6 @@ export class OrdersService {
             user.email,
             user.phone,
             `Оплата за первый месяц курса ${link.course.courseName}`,
-            true
         )
 
         order.recurrentToken = data.recurrent_token
@@ -79,36 +69,27 @@ export class OrdersService {
         }
     }
 
-    async successOrder(linkId: string) {
-        const link = await this.linkService.getPaymentLinksByUUID(linkId)
-        if (!link) {
-            throw new BadRequestException("Ссылка не найдена")
-        }
-
-        const order = await this.orderModel.findOne({where: {linkId: link.id}, include: {all: true}})
+    async addPayment(orderId: string, userId: number) {
+        const order = await this.orderModel.findOne({where: {paymentId: orderId, userId}, include: [{all: true, nested: true}]})
         if (!order) {
             throw new BadRequestException("Заказ не найден")
         }
 
-        await this.smsService.removePhone(order.user.phone)
+        const data = await this.generatePaymentLink(
+            order.link.course.courseName,
+            order.monthlyPrice,
+            order.paymentId,
+            order.user.email,
+            order.user.phone,
+            `Оплата за первый месяц курса ${order.link.course.courseName}`,
+        )
 
-        order.status = 'active'
-        order.remainingMonth -= 1
-
-        let nextBillingDate = getNextBillingDate(order.nextBillingDate)
-        order.nextBillingDate = nextBillingDate;
-
+        order.recurrentToken = data.recurrent_token
         await order.save()
-        
-        await this.paymentService.createPayment({
-            amount: order.monthlyPrice,
-            orderId: order.id,
-            status: 'success',
-            currency: 'KZT',
-            paymentDate: new Date(),
-        })
-        // {   "data": "eyJwYXltZW50X2lkIjo4Nzk0NDExODczMDMyNDI5Mywib3BlcmF0aW9uX2lkIjo4Nzk0NDE1NDQ5OTI4MzI2OSwib3JkZXJfaWQiOiI2ZmVhZTljNi0xN2ZkLTQ1MjAtYTE4OS0xNDBjODBhMDU3ZTUiLCJwYXltZW50X3R5cGUiOiJwYXkiLCJvcGVyYXRpb25fdHlwZSI6IndpdGhkcmF3Iiwib3BlcmF0aW9uX3N0YXR1cyI6ImVycm9yIiwiZXJyb3JfY29kZSI6InByb3ZpZGVyX2luY29ycmVjdF9yZXNwb25zZV9mb3JtYXQiLCJhbW91bnQiOjgzLjQyLCJhbW91bnRfaW5pdGlhbCI6ODMuNDIsImNyZWF0ZWRfZGF0ZSI6IjIwMjUtMDItMjYgMTY6NDY6NDAuODk5MDQ1ICswMDAwIFVUQyIsInBheW1lbnRfZGF0ZSI6IjIwMjUtMDItMjYgMTY6NDY6MTkgKzAwMDAgVVRDIiwicGF5ZXJfaW5mbyI6eyJwYW5fbWFza2VkIjoiNDUxNzA3KioqKioqNTQ5OCIsImhvbGRlciI6IiIsImVtYWlsIjoiIiwicGhvbmUiOiIrNzc3NzA2MDg4ODgifSwiZXh0cmFfcGFyYW1zIjoie30iLCJwaG9uZV9udW1iZXIiOiIifQ==",   
-        //     "sign": "540e435880a811765105d49f7cbe8bdf6cc2935aa34559a6c7f619a5affe1828470f58ab26c59528b24a627163a73cdc55fdc14a9beeee9a1de18ab1444e064b" }
+
+        return {
+            paymentUrl: data.payment_page_url,
+        }
     }
 
     async cancelOrder(orderId: number, userId: number) {
@@ -123,8 +104,35 @@ export class OrdersService {
 
     async getCallback(orderId: string, dto: any) {
         const order = await this.orderModel.findOne({where: {paymentId: orderId}})
-        this.logger.log("DTO: ", dto)
-    }
+        if (!order) {
+            throw new BadRequestException("Заявка не найдена")
+        }
+
+        const currentDate = new Date();
+        const dateFormatted = currentDate.toISOString().split('T')[0]
+        const jsonData = JSON.parse(Buffer.from(dto.data, 'base64').toString('utf-8'));
+
+        this.logger.log("CALLBACK: ", jsonData)
+
+        if (jsonData.operation_status === "success") {
+            await this.smsService.removePhone(order.user.phone)
+
+            let nextBillingDate = getNextBillingDate(dateFormatted)
+            order.nextBillingDate = nextBillingDate;
+            order.remainingMonth -= 1
+            order.status = "active"
+
+            await order.save()
+
+            await this.paymentService.createPayment({
+                amount: order.monthlyPrice,
+                orderId: order.id,
+                status: 'success',
+                currency: 'KZT',
+                paymentDate: currentDate,
+            })
+        }
+    }  
 
     async getOrders(userId: number) {
         console.log("USERRRR: ", userId)
@@ -203,7 +211,6 @@ export class OrdersService {
         userEmail: string,
         phone: string,
         description: string,
-        createRecurrent = true,
     ): Promise<any> {
         // 1) Prepare the payment body (matching the structure from your screenshot)
         const paymentBody = {
@@ -227,8 +234,8 @@ export class OrdersService {
           user_id: 'some-user-id',      // or your internal user reference
           email: userEmail,
           phone,
-          success_url: `https://popodpiske.com/success`, // adjust to your domain
-          failure_url: `https://popodpiske.com/failure`,
+          success_url: `https://popodpiske.com/success/${orderId}`, // adjust to your domain
+          failure_url: `https://popodpiske.com/failure/${orderId}`,
           callback_url: `https://api.popodpiske.com/orders/callback/${orderId}`,
           payment_lifetime: 3600,
           create_recurrent_profile: true, // true or false
@@ -270,7 +277,6 @@ export class OrdersService {
             const jsonData = JSON.parse(Buffer.from(data.data, 'base64').toString('utf-8'));
             console.log("DATA: ", jsonData)
             return jsonData;
-            // 86864428359842110
         } catch (error) {
             console.error(error)
             // If there's an error from Paysage, log or rethrow

@@ -36,13 +36,14 @@ export class OrdersController {
     return await this.orderService.createOrder(dto, user.id);
   }
 
-  @Post("success")
+  @Post("add-payment")
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Успешный заказ', description: 'Отмечает заказ как успешный по переданному linkId.' })
   @ApiBody({ schema: { example: { linkId: 'abc123-uuid' } } })
   @ApiResponse({ status: 200, description: 'Заказ успешно отмечен как успешный.' })
-  async successOrder(@Body() dto: { linkId: string }) {
-    return await this.orderService.successOrder(dto.linkId);
+  async addPayment(@Body('orderId') orderId: string, @Request() req) {
+    const user = req.user as Payload; 
+    return await this.orderService.addPayment(orderId, user.id);
   }
 
   @Get()
