@@ -81,9 +81,11 @@ export class OrdersService {
         const newPaymentId = uuidv4()
         order.paymentId = newPaymentId
 
+        this.logger.log("PAYMENT: ")
+
         const data = await this.generatePaymentLink(
             order.link.course.courseName,
-            order.monthlyPrice,
+            Number(order.monthlyPrice),
             newPaymentId,
             order.user.email,
             order.user.phone,
