@@ -116,11 +116,16 @@ export class OrdersService {
 
         if (jsonData.operation_status === "success") {
             await this.smsService.removePhone(order.user.phone)
-
-            let nextBillingDate = getNextBillingDate(dateFormatted)
-            order.nextBillingDate = nextBillingDate;
             order.remainingMonth -= 1
-            order.status = "active"
+
+            if (order.remainingMonth === 0) {
+                order.status = "completed"
+            } else {
+                order.status = "active"
+
+                let nextBillingDate = getNextBillingDate(dateFormatted)
+                order.nextBillingDate = nextBillingDate;
+            }
 
             await order.save()
 
