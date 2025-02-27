@@ -78,10 +78,13 @@ export class OrdersService {
             throw new BadRequestException("Заказ не найден")
         }
 
+        const newPaymentId = uuidv4()
+        order.paymentId = newPaymentId
+
         const data = await this.generatePaymentLink(
             order.link.course.courseName,
             order.monthlyPrice,
-            order.paymentId,
+            newPaymentId,
             order.user.email,
             order.user.phone,
             `Оплата за первый месяц курса ${order.link.course.courseName}`,
