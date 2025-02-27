@@ -32,6 +32,10 @@ export class PaymentLinkService {
             throw new BadRequestException("Ссылка не найдена");
         }
 
+        if (link.isUsed) {
+            throw new BadRequestException("Ссылка была использована")
+        }
+
         if (new Date() > link.expiresAt) {
             throw new BadRequestException("Срок действия ссылки истек");
         }
@@ -52,9 +56,6 @@ export class PaymentLinkService {
         ], order: [['id', 'ASC']], });
     }
 
-    async markLinkAsUsed(id: string) {
-        await this.paymentLinkModel.update({ isUsed: true }, { where: { uuid: id } });
-    }
     
     async getPaymentLink(id: number) {
         return await this.paymentLinkModel.findByPk(id, {include: {all: true}});

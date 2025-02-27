@@ -107,13 +107,4 @@ export class OrdersController {
     async validatePaymentLink(@Param('id') id: string) {
         return await this.paymentLinkService.validatePaymentLink(id);
     }
-
-    @Post('links/:id/mark-used')
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Отметить ссылку оплаты как использованную', description: 'Помечает ссылку оплаты как использованную по её идентификатору.' })
-    @ApiParam({ name: 'id', description: 'Идентификатор ссылки оплаты', type: String })
-    @ApiResponse({ status: 200, description: 'Ссылка оплаты успешно отмечена как использованная.' })
-    async markPaymentLinkAsUsed(@Param('id') id: string) {
-        return await this.paymentLinkService.markLinkAsUsed(id);
-    }
 }

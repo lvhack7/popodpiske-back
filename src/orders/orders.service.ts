@@ -64,6 +64,9 @@ export class OrdersService {
         order.recurrentToken = data.recurrent_token
         await order.save()
 
+        link.isUsed = true
+        await link.save()
+
         return {
             paymentUrl: data.payment_page_url,
         }
