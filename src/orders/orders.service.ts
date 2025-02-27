@@ -239,7 +239,7 @@ export class OrdersService {
           user_id: 'some-user-id',      // or your internal user reference
           email: userEmail,
           phone,
-          success_url: `https://popodpiske.com/success/${orderId}`, // adjust to your domain
+          success_url: `https://popodpiske.com/dashboard`, // adjust to your domain
           failure_url: `https://popodpiske.com/failure/${orderId}`,
           callback_url: `https://api.popodpiske.com/orders/callback/${orderId}`,
           payment_lifetime: 3600,
