@@ -193,13 +193,13 @@ export class OrdersService {
             order: [['id', 'ASC']],
         });
 
-        for (const order of orders) {
-            // Check that order.link and order.link.course exist and that courseName is available
-            if (!order.courseName && order.link && order.link.course && order.link.course.courseName) {
-                order.courseName = order.link.course.courseName;
-                await order.save();  // Persist the change to the database
-            }
-        }
+        // for (const order of orders) {
+        //     // Check that order.link and order.link.course exist and that courseName is available
+        //     if (!order.courseName && order.link && order.link.course && order.link.course.courseName) {
+        //         order.courseName = order.link.course.courseName;
+        //         await order.save();  // Persist the change to the database
+        //     }
+        // }
 
         return orders
     }
