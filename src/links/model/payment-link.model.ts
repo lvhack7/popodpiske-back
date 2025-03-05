@@ -60,11 +60,11 @@ export class PaymentLink extends Model<PaymentLink, PaymentLinkCreationAttrs> {
 
   @ApiProperty({ description: 'Идентификатор курса, для которого создана ссылка оплаты', example: 1 })
   @ForeignKey(() => Course)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: true })
   courseId: number;
 
   @ApiProperty({ description: 'Курс, связанный со ссылкой оплаты', type: () => Course })
-  @BelongsTo(() => Course)
+  @BelongsTo(() => Course, { onDelete: 'SET NULL' })
   course: Course;
 
   @ApiProperty({ description: 'Администратор, создавший ссылку оплаты', type: () => Admin })
