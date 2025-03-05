@@ -6,7 +6,7 @@ import { PaymentLink } from './model/payment-link.model';
 import { CoursesModule } from 'src/courses/courses.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([PaymentLink]), CoursesModule],
+  imports: [SequelizeModule.forFeature([PaymentLink])],
   controllers: [LinksController],
   providers: [PaymentLinkService],
   exports: [PaymentLinkService]

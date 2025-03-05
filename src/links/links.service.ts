@@ -8,7 +8,6 @@ import { CoursesService } from 'src/courses/courses.service';
 export class PaymentLinkService {
 
     constructor(
-        private courseService: CoursesService,
         @InjectModel(PaymentLink) private readonly paymentLinkModel: typeof PaymentLink
     ) {}
 
@@ -42,11 +41,6 @@ export class PaymentLinkService {
             throw new BadRequestException("Срок действия ссылки истек");
         }
 
-        const course = await this.courseService.findOne(link.courseId);
-        if (!course) {
-            throw new BadRequestException("Курс не найден");
-        }
-
         return link
     }
 
@@ -70,5 +64,9 @@ export class PaymentLinkService {
 
     async getPaymentLinksByUUID(uuid: string) {
         return await this.paymentLinkModel.findOne({ where: { uuid }, include: [{all: true, nested: true}] });
+    }
+
+    async deleteLinksByCourseId(courseId: number) {
+        await this.paymentLinkModel.destroy({ where: { courseId } });
     }
 }

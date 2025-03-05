@@ -3,12 +3,14 @@ import { InjectModel } from '@nestjs/sequelize';
 import { Course } from './model/course.model';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
+import { PaymentLinkService } from 'src/links/links.service';
 
 @Injectable()
 export class CoursesService {
     constructor(
         @InjectModel(Course)
         private readonly courseModel: typeof Course,
+        private linkService: PaymentLinkService,
     ) {}
 
     async create(dto: CreateCourseDto): Promise<Course> {
@@ -33,10 +35,11 @@ export class CoursesService {
         return course;
     }
 
-    async delete(id: number): Promise<void> {
-        const course = await this.findOne(id);
-        await course.destroy();
-    }
+    async delete(courseId: number) {
+        await this.linkService.deleteLinksByCourseId(courseId);
+        // Now delete the course
+        await this.courseModel.destroy({ where: { id: courseId } });
+      }
 
     async updateCourse(dto: UpdateCourseDto) {
         const course = await this.courseModel.findByPk(dto.id)
