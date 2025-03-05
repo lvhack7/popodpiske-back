@@ -67,6 +67,9 @@ export class PaymentLinkService {
     }
 
     async deleteLinksByCourseId(courseId: number) {
-        await this.paymentLinkModel.destroy({ where: { courseId }, force: true });
+        await this.paymentLinkModel.update(
+            { courseId: null },
+            { where: { courseId } },
+        );
     }
 }
