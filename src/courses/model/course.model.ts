@@ -32,6 +32,6 @@ export class Course extends Model<Course, CourseCreationAttrs> {
   totalPrice: number;
 
   @ApiProperty({ description: 'Ссылки оплаты, связанные с курсом', type: [PaymentLink] })
-  @HasMany(() => PaymentLink)
+  @HasMany(() => PaymentLink, {onDelete: 'CASCADE'})
   links: PaymentLink[];
 }

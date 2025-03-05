@@ -64,7 +64,9 @@ export class PaymentLink extends Model<PaymentLink, PaymentLinkCreationAttrs> {
   courseId: number;
 
   @ApiProperty({ description: 'Курс, связанный со ссылкой оплаты', type: () => Course })
-  @BelongsTo(() => Course)
+  @BelongsTo(() => Course, {
+    onDelete: 'CASCADE'
+  })
   course: Course;
 
   @ApiProperty({ description: 'Администратор, создавший ссылку оплаты', type: () => Admin })
