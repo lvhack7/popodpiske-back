@@ -3,9 +3,10 @@ import { LinksController } from './links.controller';
 import { PaymentLinkService } from './links.service';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { PaymentLink } from './model/payment-link.model';
+import { CoursesModule } from 'src/courses/courses.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([PaymentLink])],
+  imports: [SequelizeModule.forFeature([PaymentLink]), CoursesModule],
   controllers: [LinksController],
   providers: [PaymentLinkService],
   exports: [PaymentLinkService]
