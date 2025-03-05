@@ -47,6 +47,7 @@ export class OrdersService {
             userId, 
             linkId: link.id,
             remainingMonth: dto.numberOfMonths,
+            courseName: link.course.courseName,
             totalPrice: link.course.totalPrice,
             paymentId,
             status: 'pending',

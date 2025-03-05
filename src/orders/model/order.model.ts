@@ -3,19 +3,21 @@ import { User } from "src/users/model/user.model";
 import { PaymentLink } from "../../links/model/payment-link.model";
 import { Payment } from "src/payments/model/payment.model";
 import { ApiProperty } from "@nestjs/swagger";
+import { TEXT } from "sequelize";
 
 
 export interface OrderCreationAttrs {
-    totalPrice: number;
-    numberOfMonths: number;
-    monthlyPrice: number;
-    nextBillingDate?: string;
-    recurrentToken?: string;
-    remainingMonth: number;
-    status: string;
-    userId: number;
-    linkId: number;
-    paymentId: string;
+  courseName: string
+  totalPrice: number;
+  numberOfMonths: number;
+  monthlyPrice: number;
+  nextBillingDate?: string;
+  recurrentToken?: string;
+  remainingMonth: number;
+  status: string;
+  userId: number;
+  linkId: number;
+  paymentId: string;
 }
 
 @Table({ tableName: 'order', timestamps: true })
@@ -24,6 +26,10 @@ export class Order extends Model<Order, OrderCreationAttrs> {
   @ApiProperty({ example: 1, description: 'Уникальный идентификатор заказа' })
   @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
   id: number;
+
+  @ApiProperty({ example: "Course", description: 'Название курса' })
+  @Column({ type: TEXT, allowNull: true })
+  courseName: string;
 
   @ApiProperty({ example: 4500, description: 'Общая стоимость заказа' })
   @Column({ type: DataType.DECIMAL(10, 2), allowNull: true })

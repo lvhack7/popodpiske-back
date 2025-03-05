@@ -2,11 +2,13 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { PaymentLink } from './model/payment-link.model';
 import { GenerateLinkDto } from './dto/generate-link.dto';
+import { CoursesService } from 'src/courses/courses.service';
 
 @Injectable()
 export class PaymentLinkService {
 
     constructor(
+        private courseService: CoursesService,
         @InjectModel(PaymentLink) private readonly paymentLinkModel: typeof PaymentLink
     ) {}
 
@@ -38,6 +40,11 @@ export class PaymentLinkService {
 
         if (new Date() > link.expiresAt) {
             throw new BadRequestException("Срок действия ссылки истек");
+        }
+
+        const course = await this.courseService.findOne(link.courseId);
+        if (!course) {
+            throw new BadRequestException("Курс не найден");
         }
 
         return link
