@@ -37,9 +37,8 @@ export class CoursesService {
 
     async delete(courseId: number) {
         await this.linkService.deleteLinksByCourseId(courseId);
-        // Now delete the course
         await this.courseModel.destroy({ where: { id: courseId } });
-      }
+    }
 
     async updateCourse(dto: UpdateCourseDto) {
         const course = await this.courseModel.findByPk(dto.id)
