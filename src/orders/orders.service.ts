@@ -112,41 +112,61 @@ export class OrdersService {
     }
 
     async getCallback(orderId: string, dto: any) {
-        const order = await this.orderModel.findOne({where: {paymentId: orderId}})
+        // Fetch the order and include the associated user.
+        const order = await this.orderModel.findOne({
+          where: { paymentId: orderId },
+          include: {all: true},
+        });
         if (!order) {
-            throw new BadRequestException("Заявка не найдена")
+          throw new BadRequestException("Order not found");
         }
-
+      
         const currentDate = new Date();
-        const dateFormatted = currentDate.toISOString().split('T')[0]
-        const jsonData = JSON.parse(Buffer.from(dto.data, 'base64').toString('utf-8'));
-
-        this.logger.log("CALLBACK: ", jsonData)
-
-        if (jsonData.operation_status === "success") {
-            await this.smsService.removePhone(order.user.phone)
-            order.remainingMonth -= 1
-
-            if (order.remainingMonth === 0) {
-                order.status = "completed"
-            } else {
-                order.status = "active"
-
-                let nextBillingDate = getNextBillingDate(dateFormatted)
-                order.nextBillingDate = nextBillingDate;
-            }
-
-            await order.save()
-
-            await this.paymentService.createPayment({
-                amount: order.monthlyPrice,
-                orderId: order.id,
-                status: 'success',
-                currency: 'KZT',
-                paymentDate: currentDate,
-            })
+        const dateFormatted = currentDate.toISOString().split('T')[0];
+      
+        // Decode and parse the incoming JSON data.
+        const decodedData = Buffer.from(dto.data, 'base64').toString('utf-8');
+        const jsonData = JSON.parse(decodedData);
+      
+        // Log the raw and processed operation_status.
+        this.logger.log("CALLBACK raw:", jsonData.operation_status);
+        const operationStatus = String(jsonData.operation_status).trim().toLowerCase();
+        this.logger.log("CALLBACK processed:", operationStatus);
+      
+        // Check if the operation_status equals "success".
+        if (operationStatus === "success") {
+          if (order.user && order.user.phone) {
+            await this.smsService.removePhone(order.user.phone);
+          } else {
+            this.logger.warn("User phone not available on order");
+          }
+      
+          order.remainingMonth -= 1;
+      
+          // Update order status based on remainingMonth.
+          if (order.remainingMonth === 0) {
+            order.status = "completed";
+          } else {
+            order.status = "active";
+            // Calculate the next billing date.
+            const nextBillingDate = getNextBillingDate(dateFormatted);
+            order.nextBillingDate = nextBillingDate;
+          }
+      
+          await order.save();
+      
+          // Create a payment record.
+          await this.paymentService.createPayment({
+            amount: order.monthlyPrice,
+            orderId: order.id,
+            status: 'success',
+            currency: 'KZT',
+            paymentDate: currentDate,
+          });
+        } else {
+          this.logger.warn(`Operation status is not success: ${operationStatus}`);
         }
-    }  
+    }
 
     async getOrders(userId: number) {
         console.log("USERRRR: ", userId)
