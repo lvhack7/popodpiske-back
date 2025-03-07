@@ -129,6 +129,7 @@ export class OrdersService {
         const jsonData = JSON.parse(decodedData);
       
         // Log the raw and processed operation_status.
+        this.logger.log("ORDER ID: ", orderId)
         this.logger.log("CALLBACK raw:", jsonData.operation_status);
         const operationStatus = String(jsonData.operation_status).trim().toLowerCase();
         this.logger.log("CALLBACK processed:", operationStatus);
