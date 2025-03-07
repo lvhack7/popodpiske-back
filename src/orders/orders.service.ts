@@ -118,7 +118,7 @@ export class OrdersService {
           include: {all: true},
         });
         if (!order) {
-          throw new BadRequestException("Order not found");
+          throw new BadRequestException("Заявка не найдена");
         }
       
         const currentDate = new Date();
