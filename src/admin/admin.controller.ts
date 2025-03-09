@@ -73,7 +73,7 @@ export class AdminController {
     };
   }
 
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.SuperAdmin)
   @Delete('/:id')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Удаление администратора', description: 'Удаляет администратора по указанному идентификатору.' })
@@ -81,7 +81,8 @@ export class AdminController {
   @ApiResponse({ status: 200, description: 'Администратор успешно удалён.' })
   @ApiResponse({ status: 404, description: 'Администратор не найден.' })
   async removeAdmin(@Param('id') adminId: number) {
-    return await this.adminService.removeAdmin(adminId);
+    const admin = req.user;
+    return await this.adminService.removeAdmin(adminId, admin.roles);
   }
 
   @Roles(Role.Admin)

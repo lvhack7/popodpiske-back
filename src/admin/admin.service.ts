@@ -129,15 +129,21 @@ export class AdminService {
         })
     }
 
-    async removeAdmin(adminId: number) {
+    async removeAdmin(adminId: number, roles: string[]) {
         const admin = await this.adminModel.findByPk(adminId, {include: {all: true}})
         if (!admin) {
             throw new BadRequestException("Пользователь не найден")
         }
 
-        const hasAdminRole = admin.roles.some(role => role.value === "ADMIN");
-        if (hasAdminRole) {
-            throw new BadRequestException("Нельзя удалить пользователя с ролью ADMIN");
+        const canDeleteAdmin = roles.includes(Role.SuperAdmin);
+        const canDeleteManager = roles.includes(Role.SuperAdmin) || roles.includes(Role.Admin);
+    
+        if (admin.roles.map((role) => role.value).includes(Role.Admin) && !canDeleteAdmin) {
+            throw new ForbiddenException("Только Главный Админ может удалить пользователя с ролью Админ");
+        }
+    
+        if (admin.roles.map((role) => role.value).includes(Role.Manager) && !canDeleteManager) {
+            throw new ForbiddenException("Только Админ может удалить пользователя с ролью Менеджер");
         }
 
         await admin.destroy()
