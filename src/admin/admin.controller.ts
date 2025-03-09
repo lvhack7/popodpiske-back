@@ -80,7 +80,7 @@ export class AdminController {
   @ApiParam({ name: 'id', type: Number, description: 'Идентификатор администратора для удаления' })
   @ApiResponse({ status: 200, description: 'Администратор успешно удалён.' })
   @ApiResponse({ status: 404, description: 'Администратор не найден.' })
-  async removeAdmin(@Param('id') adminId: number) {
+  async removeAdmin(@Param('id') adminId: number, @Request() req) {
     const admin = req.user;
     return await this.adminService.removeAdmin(adminId, admin.roles);
   }
