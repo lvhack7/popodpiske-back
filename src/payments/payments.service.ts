@@ -62,7 +62,6 @@ export class PaymentsService {
 
             const jsonData = JSON.parse(Buffer.from(data.data, 'base64').toString('utf-8'));
 
-            console.log(jsonData)
             if (status === 200) {
                 return {status: "success", message: "Оплата прошла успешно", paymentId: jsonData.payment_id};
             } else {  

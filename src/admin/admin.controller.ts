@@ -15,20 +15,23 @@ import {
   ApiBearerAuth, 
   ApiParam 
 } from '@nestjs/swagger';
+import { ChangePasswordDto } from './dto/change-password.dto';
+
 
 @ApiTags('Администратор')
 @Controller('admin')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
-  @Roles(Role.Admin)
+  @Roles(Role.Admin, Role.SuperAdmin)
   @Post('register')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Регистрация администратора', description: 'Регистрирует нового администратора с заданными данными.' })
   @ApiResponse({ status: 201, description: 'Администратор успешно зарегистрирован.' })
   @ApiResponse({ status: 400, description: 'Неверные входные данные.' })
-  async registerAdmin(@Body() dto: RegisterAdminDto) {
-    return await this.adminService.register(dto);
+  async registerAdmin(@Body() dto: RegisterAdminDto, @Request() req) {
+    const admin = req.user;
+    return await this.adminService.register(dto, admin.roles);
   }
 
   @Public()
@@ -88,5 +91,16 @@ export class AdminController {
   @ApiResponse({ status: 200, description: 'Список администраторов успешно получен.' })
   async getAdmins() {
     return await this.adminService.getAdmins();
+  }
+
+  @Post('change-password')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Изменение пароля администратора', description: 'Изменяет пароль администратора.' })
+  @ApiResponse({ status: 200, description: 'Пароль успешно изменен.' })
+  @ApiResponse({ status: 400, description: 'Неверные входные данные.' })
+  @ApiResponse({ status: 404, description: 'Администратор не найден.' })
+  async changePassword(@Request() req, @Body() dto: ChangePasswordDto) {
+    const admin = req.user;
+    return await this.adminService.changePassword(admin.id, dto);
   }
 }

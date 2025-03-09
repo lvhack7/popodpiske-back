@@ -7,6 +7,8 @@ import { JwtService } from '@nestjs/jwt';
 import { AdminRefreshToken } from './model/admin-refresh-token.model';
 import { RegisterAdminDto } from './dto/register.dto';
 import { RolesService } from 'src/roles/roles.service';
+import { Role } from 'src/common/enum/roles.enum';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 
 @Injectable()
@@ -36,28 +38,36 @@ export class AdminService {
         return tokens
     }
 
-    async register(dto: RegisterAdminDto) {
-        console.log("DTO, ", dto)
-        const admin = await this.adminModel.findOne({ where: { login: dto.login } })
+    async register(dto: RegisterAdminDto, roles: string[]) {
+        const admin = await this.adminModel.findOne({ where: { login: dto.login } });
         if (admin) {
-            throw new BadRequestException("Пользователь под логином уже существует")
+            throw new BadRequestException("Пользователь под логином уже существует");
         }
-        
-        const hashedPassword = await bcrypt.hash(dto.password, 5)
-
-        const newadmin = await this.adminModel.create({
+    
+        const hashedPassword = await bcrypt.hash(dto.password, 5);
+    
+        // Check if the current admin has the necessary roles to create the new admin
+        const canCreateAdmin = roles.includes(Role.SuperAdmin);
+        const canCreateManager = roles.includes(Role.SuperAdmin) || roles.includes(Role.Admin);
+    
+        if (dto.role === Role.Admin && !canCreateAdmin) {
+            throw new ForbiddenException("Только SUPER_ADMIN может создать пользователя с ролью ADMIN");
+        }
+    
+        if (dto.role === Role.Manager && !canCreateManager) {
+            throw new ForbiddenException("Только SUPER_ADMIN или ADMIN может создать пользователя с ролью MANAGER");
+        }
+    
+        const newAdmin = await this.adminModel.create({
             login: dto.login,
-            password: hashedPassword
-        })
-
-        const role = await this.roleService.getRoleByValue(dto.role)
-
-        await newadmin.$set('roles', [role])
-
-        return {message: "Пользователь создан!"}
-        // const tokens = await this.generateTokens(newadmin)
-        // await this.hashAndSaveRefreshToken(tokens.refreshToken, newadmin)
-        // return tokens
+            password: hashedPassword,
+        });
+    
+        const role = await this.roleService.getRoleByValue(dto.role);
+    
+        await newAdmin.$set('roles', [role]);
+    
+        return { message: "Пользователь создан!" };
     }
 
     async refresh(admin: any) {
@@ -91,6 +101,24 @@ export class AdminService {
         const tokens = await this.generateTokens(foundadmin)
         await this.hashAndSaveRefreshToken(tokens.refreshToken, foundadmin)
         return tokens
+    }
+
+    async changePassword(adminId: number, dto: ChangePasswordDto) {
+        const admin = await this.adminModel.findByPk(adminId);
+        if (!admin) {
+          throw new BadRequestException('Пользователь не найден');
+        }
+    
+        const passwordMatch = await bcrypt.compare(dto.oldPassword, admin.password);
+        if (!passwordMatch) {
+          throw new BadRequestException('Текущий пароль неверен');
+        }
+    
+        const hashedNewPassword = await bcrypt.hash(dto.newPassword, 5);
+        admin.password = hashedNewPassword;
+        await admin.save();
+    
+        return { message: 'Пароль успешно изменен' };
     }
 
     async getAdmins() {
