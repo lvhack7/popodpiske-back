@@ -51,11 +51,11 @@ export class AdminService {
         const canCreateManager = roles.includes(Role.SuperAdmin) || roles.includes(Role.Admin);
     
         if (dto.role === Role.Admin && !canCreateAdmin) {
-            throw new ForbiddenException("Только SUPER_ADMIN может создать пользователя с ролью ADMIN");
+            throw new ForbiddenException("Только Главный Админ может создать пользователя с ролью Админ");
         }
     
         if (dto.role === Role.Manager && !canCreateManager) {
-            throw new ForbiddenException("Только SUPER_ADMIN или ADMIN может создать пользователя с ролью MANAGER");
+            throw new ForbiddenException("Только Главный Админ или Админ может создать пользователя с ролью Менеджер");
         }
     
         const newAdmin = await this.adminModel.create({
