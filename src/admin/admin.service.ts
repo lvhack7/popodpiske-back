@@ -45,7 +45,11 @@ export class AdminService {
         }
     
         const hashedPassword = await bcrypt.hash(dto.password, 5);
-    
+        
+        if (dto.role === "SuperAdmin" && roles.length > 0) {
+            throw new ForbiddenException("Главный Админ уже существует");
+        }
+
         // Check if the current admin has the necessary roles to create the new admin
         const canCreateAdmin = roles.includes(Role.SuperAdmin);
         const canCreateManager = roles.includes(Role.SuperAdmin) || roles.includes(Role.Admin);
