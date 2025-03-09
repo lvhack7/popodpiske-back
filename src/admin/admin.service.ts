@@ -46,7 +46,7 @@ export class AdminService {
     
         const hashedPassword = await bcrypt.hash(dto.password, 5);
         
-        if (dto.role === "SuperAdmin" && roles.length > 0) {
+        if (dto.role === Role.SuperAdmin && roles.length > 0) {
             throw new ForbiddenException("Главный Админ уже существует");
         }
 
