@@ -9,9 +9,10 @@ import { PaymentLink } from '../links/model/payment-link.model';
 import { AdminRefreshToken } from './model/admin-refresh-token.model';
 import { RolesModule } from 'src/roles/roles.module';
 import { AdminRefreshTokenStrategy } from './strategies/admin-refresh-toke.strategy';
+import { LinksModule } from 'src/links/links.module';
 
 @Module({
-  imports: [JwtModule.register({}), RolesModule, SequelizeModule.forFeature([Admin, AdminRefreshToken])],
+  imports: [JwtModule.register({}), RolesModule, LinksModule, SequelizeModule.forFeature([Admin, AdminRefreshToken])],
   providers: [AdminService, AdminRefreshTokenStrategy],
   controllers: [AdminController]
 })

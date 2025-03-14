@@ -55,7 +55,7 @@ export class PaymentLink extends Model<PaymentLink, PaymentLinkCreationAttrs> {
 
   @ApiProperty({ description: 'Идентификатор администратора, создавшего ссылку оплаты', example: 1 })
   @ForeignKey(() => Admin)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.INTEGER, allowNull: true })
   adminId: number;
 
   @ApiProperty({ description: 'Идентификатор курса, для которого создана ссылка оплаты', example: 1 })

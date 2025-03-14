@@ -9,6 +9,7 @@ import { RegisterAdminDto } from './dto/register.dto';
 import { RolesService } from 'src/roles/roles.service';
 import { Role } from 'src/common/enum/roles.enum';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { PaymentLinkService } from 'src/links/links.service';
 
 
 @Injectable()
@@ -19,6 +20,7 @@ export class AdminService {
         @InjectModel(AdminRefreshToken) private refreshRepo: typeof AdminRefreshToken,
         private jwtService: JwtService,
         private roleService: RolesService,
+        private linkService: PaymentLinkService
     ) {}
     
     async login(dto: LoginAdminDto) {
@@ -151,6 +153,7 @@ export class AdminService {
         }
 
         await this.refreshRepo.destroy({where: {adminId: admin.id}})
+        await this.linkService.deleteLinksByAdminId(admin.id)
         await admin.destroy()
     }
 

@@ -72,4 +72,9 @@ export class PaymentLinkService {
             { where: { courseId } },
         );
     }
+
+    async deleteLinksByAdminId(adminId: number) {
+        await this.paymentLinkModel.destroy({ where: { adminId } });
+    }
+
 }
