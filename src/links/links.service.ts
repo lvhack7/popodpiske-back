@@ -74,7 +74,7 @@ export class PaymentLinkService {
     }
 
     async deleteLinksByAdminId(adminId: number) {
-        await this.paymentLinkModel.destroy({ where: { adminId } });
+        await this.paymentLinkModel.update( { adminId: null }, { where: { adminId } });
     }
 
 }
