@@ -38,7 +38,7 @@ async function bootstrap() {
 
   app.enableCors({
     allowedHeaders: ['Authorization', 'Content-type'],
-    origin: ['https://popodpiske.com', 'https://admin.popodpiske.com'],
+    origin: ['http://localhost:5173', 'https://popodpiske.com', 'https://admin.popodpiske.com'],
 		credentials: true,
   })
   

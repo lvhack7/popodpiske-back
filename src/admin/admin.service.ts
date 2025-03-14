@@ -152,8 +152,8 @@ export class AdminService {
             throw new ForbiddenException("Только Админ может удалить пользователя с ролью Менеджер");
         }
 
-        await this.refreshRepo.destroy({where: {adminId: admin.id}})
-        await this.linkService.deleteLinksByAdminId(admin.id)
+        await this.refreshRepo.destroy({where: {adminId: adminId}})
+        await this.linkService.deleteLinksByAdminId(adminId)
         await admin.destroy()
     }
 
