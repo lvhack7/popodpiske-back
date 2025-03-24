@@ -56,6 +56,7 @@ export class SmsService {
           expiresAt.setMinutes(expiresAt.getMinutes() + 1); // 1 minute expiry
     
           this.logger.log('The code is: ' + code);
+          this.logger.log("WA Data: ", response.data)
           await this.removePhone(phone);
           await this.smsVerificationModel.create({ phone, code, expiresAt });
     
