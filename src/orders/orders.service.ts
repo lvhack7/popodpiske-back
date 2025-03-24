@@ -37,7 +37,7 @@ export class OrdersService {
 
         const smsVerified = await this.smsService.findVerified(user.phone)
         if (!smsVerified) {
-            throw new BadRequestException("Телефон не был подтвержден!")
+            throw new BadRequestException("Пользователь не был подтвержден!")
         }
 
         const paymentId = uuidv4()
@@ -139,7 +139,7 @@ export class OrdersService {
           if (order.user && order.user.phone) {
             await this.smsService.removePhone(order.user.phone);
           } else {
-            this.logger.warn("User phone not available on order");
+            this.logger.warn("User email not available on order");
           }
       
           order.remainingMonth -= 1;

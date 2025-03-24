@@ -9,6 +9,7 @@ import { AccessTokenStrategy } from './strategies/access-token.strategy';
 import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
 import { RolesModule } from 'src/roles/roles.module';
 import { SmsModule } from 'src/sms/sms.module';
+import { MailModule } from 'src/mail/mail.module';
 
 @Module({
   imports: [SequelizeModule.forFeature([RefreshToken]), JwtModule.register({}), UsersModule, SmsModule, RolesModule],

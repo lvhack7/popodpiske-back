@@ -8,6 +8,9 @@ import { ResetToken } from './model/reset-tokens.model';
 @Injectable()
 export class SmsService {
     private logger = new Logger(SmsService.name)
+    private readonly token = process.env.WA_KEY; // set in .env
+    private readonly channelId = process.env.WA_CHANNEL; // set in .env
+    private readonly baseUrl = 'https://api.wazzup24.com/v3';
 
     constructor(
         @InjectModel(ResetToken)
@@ -22,33 +25,47 @@ export class SmsService {
 
     async sendVerificationCode(phone: string) {
         const code = this.generateCode();
-        const message = `Popodpiske. Ваш код подтверждения: ${code}`;
+        const message = `Popodpiske.com. Ваш код подтверждения: ${code}`;
     
-        const login = process.env.SMS_LOGIN; // Replace with your SMSC.kz login
-        const password = process.env.SMS_PASSWORD; // Replace with your SMSC.kz password
-        //const sender = process.env.SMS_SENDER;
-
-        const url = `https://smsc.kz/sys/send.php?login=${login}&psw=${password}&phones=${phone.replace("+", "")}&mes=${encodeURIComponent(message)}`;
-
         try {
-            const response = await axios.get(url);
-            if (response.data.includes('ERROR')) {
-                throw new HttpException('Не получилось отправить код', HttpStatus.BAD_REQUEST);
-            }
-
-            const expiresAt = new Date();
-            expiresAt.setMinutes(expiresAt.getSeconds() + 80); // Code expires in 1 minute
-
-            this.logger.log("The code is: " + code)
-            await this.removePhone(phone)
-            await this.smsVerificationModel.create({ phone, code, expiresAt });
-            return { message: 'Код успешно отправлен'};
-        } catch (error) {
-            console.log(error)
+          const response = await axios.post(
+            `${this.baseUrl}/message`,
+            { 
+                channelId: this.channelId,
+                chatId: phone.replace('+', ''),
+                chatType: "whatsapp",
+                text: message
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${this.token}`,
+                'Content-Type': 'application/json',
+              },
+            },
+          );
+    
+          // Check if Wazzup responded with success
+          if (!response.data || response.data.error) {
             throw new HttpException(
-                'Не удалось отправить СМС. Попробуйте еще раз.',
-                HttpStatus.INTERNAL_SERVER_ERROR,
+              'Не получилось отправить код через WhatsApp',
+              HttpStatus.BAD_REQUEST,
             );
+          }
+    
+          const expiresAt = new Date();
+          expiresAt.setMinutes(expiresAt.getMinutes() + 1); // 1 minute expiry
+    
+          this.logger.log('The code is: ' + code);
+          await this.removePhone(phone);
+          await this.smsVerificationModel.create({ phone, code, expiresAt });
+    
+          return { message: 'Код успешно отправлен через WhatsApp' };
+        } catch (error) {
+          this.logger.error('Ошибка при отправке через Wazzup:', error.response?.data || error.message);
+          throw new HttpException(
+            'Не удалось отправить сообщение. Попробуйте еще раз.',
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
         }
     }
 

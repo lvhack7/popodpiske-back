@@ -2,7 +2,7 @@ import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ResetPasswordDto {
-  @ApiProperty({ description: 'Номер телефона пользователя', example: '+77771234567' })
+  @ApiProperty({ description: 'Телефон', example: '+77777777777' })
   @IsString()
   @IsNotEmpty()
   phone: string;

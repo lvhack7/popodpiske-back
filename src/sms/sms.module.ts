@@ -5,8 +5,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { SMSCodes } from './model/sms-codes.model';
 import { UsersModule } from 'src/users/users.module';
 import { ResetToken } from './model/reset-tokens.model';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
-import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 
 @Module({

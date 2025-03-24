@@ -12,13 +12,14 @@ import { SmsModule } from 'src/sms/sms.module';
 
 @Module({
   imports: [SequelizeModule.forFeature([Order, PaymentLink]),
-  ConfigModule,
-  UsersModule,
-  PaymentsModule,
-  SmsModule,
-  LinksModule
+    ConfigModule,
+    UsersModule,
+    PaymentsModule,
+    SmsModule,
+    LinksModule
   ],
   providers: [OrdersService],
   controllers: [OrdersController],
 })
 export class OrdersModule {}
+

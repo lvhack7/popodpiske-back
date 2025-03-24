@@ -23,7 +23,7 @@ export class AuthService {
         @InjectModel(RefreshToken) private refreshRepo: typeof RefreshToken) {}
 
     async login(dto: LoginDto) {
-        const user = await this.userService.getUserByPhone(dto.login)
+        const user = await this.userService.getUserByPhone(dto.phone)
 
         if (!user) {
             throw new BadRequestException("Пользователя не существует")
@@ -45,8 +45,8 @@ export class AuthService {
             throw new BadRequestException("Пользователь уже существует")
         }
 
-        const smsVerified = await this.smsService.findVerified(dto.phone)
-        if (!smsVerified) {
+        const codeVerified = await this.smsService.findVerified(dto.phone)
+        if (!codeVerified) {
             throw new BadRequestException("Телефон не был подтвержден!")
         }
 
@@ -127,8 +127,8 @@ export class AuthService {
             firstName: user.firstName,
             lastName: user.lastName,
             iin: this.maskIIN(user.iin),
-            email: user.email,
-            phone: user.phone
+            phone: user.phone,
+            email: user.email
         }
 
         const accessToken = await this.jwtService.signAsync(payload, {

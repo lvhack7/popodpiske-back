@@ -56,10 +56,10 @@ export class AuthController {
   @Public()
   @Post('check-phone')
   @ApiOperation({
-    summary: 'Проверка номера телефона',
-    description: 'Проверяет, существует ли пользователь с заданным номером телефона.',
+    summary: 'Проверка телефона',
+    description: 'Проверяет, существует ли пользователь с телефоном.',
   })
-  @ApiResponse({ status: 200, description: 'Номер телефона проверен.' })
+  @ApiResponse({ status: 200, description: 'Телефон проверен.' })
   async checkPhone(@Body() dto: { phone: string }) {
     return await this.authService.checkPhone(dto.phone);
   }

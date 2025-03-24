@@ -20,6 +20,10 @@ export class UsersService {
         return await this.userRepo.findOne({where: {phone}})
     }
 
+    async getUserByEmail(email: string): Promise<User> {
+        return await this.userRepo.findOne({where: {email}})
+    }
+
     // async getByPhoneOrEmail(phone: string, email: string): Promise<User | null> {
     //     const user = await this.userRepo.findOne({
     //       where: {

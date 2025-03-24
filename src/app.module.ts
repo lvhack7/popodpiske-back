@@ -22,6 +22,7 @@ import { LinksModule } from './links/links.module';
 import { CoursesModule } from './courses/courses.module';
 import { Course } from './courses/model/course.model';
 import { ResetToken } from './sms/model/reset-tokens.model';
+import { MailModule } from './mail/mail.module';
 
 
 @Module({
@@ -56,7 +57,7 @@ import { ResetToken } from './sms/model/reset-tokens.model';
       },
       inject: [ConfigService],
     }),
-    UsersModule, AuthModule, OrdersModule, PaymentsModule, RolesModule, SmsModule, AdminModule, LinksModule, CoursesModule],
+    UsersModule, AuthModule, OrdersModule, PaymentsModule, RolesModule, SmsModule, AdminModule, LinksModule, CoursesModule, MailModule],
   controllers: [],
 })
 export class AppModule {}
