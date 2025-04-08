@@ -107,7 +107,7 @@ export class SchedulePaymentService {
     }
 
     // Run daily at 2AM, for example
-    @Cron(CronExpression.EVERY_DAY_AT_10PM)
+    @Cron(CronExpression.EVERY_DAY_AT_11AM)
     async handleRecurrentPayments() {
       this.logger.log('Running recurrent payment check...');
 
@@ -118,8 +118,8 @@ export class SchedulePaymentService {
         const dueOrders = await this.orderModel.findAll({
           where: {
             recurrentToken: { [Op.ne]: null },
-            nextBillingDate: { [Op.eq]: today },
-            status: ['active', 'past_due'], // You can add 'pending' if needed.
+            nextBillingDate: { [Op.lte]: today },
+            status: { [Op.in]: ['active', 'past_due'] }, // You can add 'pending' if needed.
             remainingMonth: { [Op.gt]: 0 },
           },
         });
