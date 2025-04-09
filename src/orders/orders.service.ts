@@ -120,14 +120,14 @@ export class OrdersService {
         if (!order) {
           throw new BadRequestException("Заявка не найдена");
         }
-      
+    
         const currentDate = new Date();
         const dateFormatted = currentDate.toISOString().split('T')[0];
       
         // Decode and parse the incoming JSON data.
         const decodedData = Buffer.from(dto.data, 'base64').toString('utf-8');
         const jsonData = JSON.parse(decodedData);
-      
+    
         // Log the raw and processed operation_status.
         this.logger.log("ORDER ID: ", orderId)
         this.logger.log("CALLBACK raw:", jsonData.operation_status);

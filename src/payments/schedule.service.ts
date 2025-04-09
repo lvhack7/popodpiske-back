@@ -107,7 +107,7 @@ export class SchedulePaymentService {
     }
 
     // Run daily at 2AM, for example
-    @Cron(CronExpression.EVERY_DAY_AT_11AM)
+    @Cron(CronExpression.EVERY_10_SECONDS)
     async handleRecurrentPayments() {
       this.logger.log('Running recurrent payment check...');
 
@@ -126,87 +126,87 @@ export class SchedulePaymentService {
 
         this.logger.log(`Found ${dueOrders.length} orders to charge.`);
 
-        for (const order of dueOrders) {
-          const amount = Number(order.monthlyPrice) || 0;
+        // for (const order of dueOrders) {
+        //   const amount = Number(order.monthlyPrice) || 0;
 
-          try {
-            const result = await this.paymentService.chargeRecurrent(
-              order.recurrentToken,
-              amount,
-            );
+        //   try {
+        //     const result = await this.paymentService.chargeRecurrent(
+        //       order.recurrentToken,
+        //       amount,
+        //     );
 
-            if (result.status === 'success') {
-              // Create a successful Payment record.
-              await this.paymentModel.create({
-                orderId: order.id,
-                amount,
-                currency: 'KZT',
-                status: 'success',
-                paymentDate: new Date(),
-                transactionId: result.paymentId,
-              });
+        //     if (result.status === 'success') {
+        //       // Create a successful Payment record.
+        //       await this.paymentModel.create({
+        //         orderId: order.id,
+        //         amount,
+        //         currency: 'KZT',
+        //         status: 'success',
+        //         paymentDate: new Date(),
+        //         transactionId: result.paymentId,
+        //       });
 
-              this.logger.log(`Order #${order.id} payment successful.`);
+        //       this.logger.log(`Order #${order.id} payment successful.`);
 
-              // Update remaining months.
-              if (order.remainingMonth && order.remainingMonth > 0) {
-                order.remainingMonth -= 1;
-                if (order.remainingMonth <= 0) {
-                  // No more installments needed.
-                  order.status = 'completed';
-                  order.nextBillingDate = null; // or leave a final record as needed.
-                  order.recurrentToken = null;
-                } else {
-                  // Payment succeeded – set status to active, regardless of previous status.
-                  order.status = 'active';
-                  // Set nextBillingDate one month from the current nextBillingDate.
-                  const nextBilling = getNextBillingDate(order.nextBillingDate);
-                  order.nextBillingDate = nextBilling;
-                }
-              } else {
-                order.remainingMonth = 0;
-                order.status = 'completed';
-                order.nextBillingDate = null;
-                order.recurrentToken = null;
-              }
+        //       // Update remaining months.
+        //       if (order.remainingMonth && order.remainingMonth > 0) {
+        //         order.remainingMonth -= 1;
+        //         if (order.remainingMonth <= 0) {
+        //           // No more installments needed.
+        //           order.status = 'completed';
+        //           order.nextBillingDate = null; // or leave a final record as needed.
+        //           order.recurrentToken = null;
+        //         } else {
+        //           // Payment succeeded – set status to active, regardless of previous status.
+        //           order.status = 'active';
+        //           // Set nextBillingDate one month from the current nextBillingDate.
+        //           const nextBilling = getNextBillingDate(order.nextBillingDate);
+        //           order.nextBillingDate = nextBilling;
+        //         }
+        //       } else {
+        //         order.remainingMonth = 0;
+        //         order.status = 'completed';
+        //         order.nextBillingDate = null;
+        //         order.recurrentToken = null;
+        //       }
 
-              await order.save();
-            } else {
-              // Payment failed.
-              this.logger.warn(`Order #${order.id} payment failed.`);
-              await this.paymentModel.create({
-                orderId: order.id,
-                amount,
-                currency: 'KZT',
-                status: 'failed',
-                paymentDate: new Date(),
-              });
+        //       await order.save();
+        //     } else {
+        //       // Payment failed.
+        //       this.logger.error(`Order #${order.id} payment failed.`);
+        //       await this.paymentModel.create({
+        //         orderId: order.id,
+        //         amount,
+        //         currency: 'KZT',
+        //         status: 'failed',
+        //         paymentDate: new Date(),
+        //       });
 
-              // Set nextBillingDate to tomorrow.
-              const tomorrow = new Date();
-              tomorrow.setDate(tomorrow.getDate() + 1);
-              order.nextBillingDate = tomorrow.toISOString().split('T')[0];
-              order.status = 'past_due';
-              await order.save();
-            }
-          } catch (err) {
-            this.logger.error(`Error charging order #${order.id}: ${err}`);
+        //       // Set nextBillingDate to tomorrow.
+        //       const tomorrow = new Date();
+        //       tomorrow.setDate(tomorrow.getDate() + 1);
+        //       order.nextBillingDate = tomorrow.toISOString().split('T')[0];
+        //       order.status = 'past_due';
+        //       await order.save();
+        //     }
+        //   } catch (err) {
+        //     this.logger.error(`Error charging order #${order.id}: ${err}`);
 
-            await this.paymentModel.create({
-              orderId: order.id,
-              amount,
-              currency: 'KZT',
-              status: 'failed',
-              paymentDate: new Date(),
-            });
+        //     await this.paymentModel.create({
+        //       orderId: order.id,
+        //       amount,
+        //       currency: 'KZT',
+        //       status: 'failed',
+        //       paymentDate: new Date(),
+        //     });
 
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            order.nextBillingDate = tomorrow.toISOString().split('T')[0];
-            order.status = 'past_due';
-            await order.save();
-          }
-        }
+        //     const tomorrow = new Date();
+        //     tomorrow.setDate(tomorrow.getDate() + 1);
+        //     order.nextBillingDate = tomorrow.toISOString().split('T')[0];
+        //     order.status = 'past_due';
+        //     await order.save();
+        //   }
+        // }
       } catch (err) {
         this.logger.error(`handleRecurrentPayments error: ${err}`);
       }
