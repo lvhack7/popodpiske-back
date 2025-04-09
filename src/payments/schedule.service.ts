@@ -119,12 +119,16 @@ export class SchedulePaymentService {
           where: {
             recurrentToken: { [Op.ne]: null },
             nextBillingDate: { [Op.lte]: today },
-            status: { [Op.in]: ['active', 'past_due'] }, // You can add 'pending' if needed.
+            status: { [Op.in]: ['active', 'past_due'] },
             remainingMonth: { [Op.gt]: 0 },
           },
         });
-
-        this.logger.log(`Found ${dueOrders.length} orders to charge.`);
+        
+        this.logger.log(
+          `Found ${dueOrders.length} orders to charge: ${dueOrders
+            .map(order => order.id)
+            .join(', ')}`
+        );
 
         // for (const order of dueOrders) {
         //   const amount = Number(order.monthlyPrice) || 0;
