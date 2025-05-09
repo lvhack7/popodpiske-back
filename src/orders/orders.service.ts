@@ -281,7 +281,7 @@ export class OrdersService {
           callback_url: `https://api.popodpiske.com/orders/callback/${orderId}`,
           payment_lifetime: 3600,
           create_recurrent_profile: true, // true or false
-          recurrent_profile_lifetime: 400,
+          recurrent_profile_lifetime: 700,
           lang: 'ru',
           extra_params: {},
         };
