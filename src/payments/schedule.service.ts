@@ -150,16 +150,11 @@ export class SchedulePaymentService {
 
         try {
           const result = await this.paymentService.chargeRecurrent(
-            order.recurrentToken!,
+            order.recurrentToken,
             amount,
           );
 
-          // 5) Normalize success check
-          const isSuccess =
-            result.status === 'success'   ||
-            result.status === 'succeeded'
-
-          if (!isSuccess) throw new Error('payment not successful');
+          if (result.status !== "success") throw new Error('payment not successful');
 
           // 6) Record successful payment
           await this.paymentModel.create({
@@ -172,10 +167,13 @@ export class SchedulePaymentService {
           });
 
           // 7) Advance subscription
-          order.remainingMonth = Math.max(0, order.remainingMonth! - 1);
-          order.status         = order.remainingMonth! > 0 ? 'active' : 'completed';
-          order.nextBillingDate = getNextBillingDate(order.nextBillingDate);
-          if (order.remainingMonth === 0) {
+          order.remainingMonth = Math.max(0, order.remainingMonth - 1);
+          if (order.remainingMonth > 0) {
+            order.status = 'active';
+            order.nextBillingDate = getNextBillingDate(order.nextBillingDate);
+          } else {
+            order.status = 'completed';
+            order.nextBillingDate = null;       // clear when done
             order.recurrentToken = null;
           }
 
