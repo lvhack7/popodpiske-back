@@ -106,113 +106,98 @@ export class SchedulePaymentService {
         }
     }
 
-    // Run daily at 2AM, for example
     @Cron(CronExpression.EVERY_DAY_AT_10PM)
     async handleRecurrentPayments() {
-      this.logger.log('Running recurrent payment check...');
+      this.logger.log('🔄 Running recurrent payment check…');
 
-      const today = new Date().toISOString().split('T')[0];
-      try {
-        // 1) Find orders that are active or past_due, have a recurrentToken, are due today (or earlier),
-        // and have remaining months.
-        const dueOrders = await this.orderModel.findAll({
-          where: {
-            recurrentToken: { [Op.ne]: null },
-            nextBillingDate: { [Op.lte]: today },
-            status: { [Op.in]: ['active', 'past_due'] },
-            remainingMonth: { [Op.gt]: 0 },
-          },
-        });
-        
-        this.logger.log(
-          `Found ${dueOrders.length} orders to charge: ${dueOrders
-            .map(order => order.id)
-            .join(', ')}`
-        );
+      const todayStr   = new Date().toISOString().split('T')[0];
+      const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-        for (const order of dueOrders) {
-          const amount = Number(order.monthlyPrice) || 0;
+      const dueOrders = await this.orderModel.findAll({
+        where: {
+          recurrentToken:  { [Op.ne]: null },
+          nextBillingDate: { [Op.lte]: todayStr },
+          status:          { [Op.in]: ['active','past_due'] },
+          remainingMonth:  { [Op.gt]:  0 },
+        },
+      });
 
-          try {
-            const result = await this.paymentService.chargeRecurrent(
-              order.recurrentToken,
-              amount,
-            );
-
-            if (result.status === 'success') {
-              // Create a successful Payment record.
-              await this.paymentModel.create({
-                orderId: order.id,
-                amount,
-                currency: 'KZT',
-                status: 'success',
-                paymentDate: new Date(),
-                transactionId: result.paymentId,
-              });
-
-              this.logger.log(`Order #${order.id} payment successful.`);
-
-              // Update remaining months.
-              if (order.remainingMonth && order.remainingMonth > 0) {
-                order.remainingMonth -= 1;
-                if (order.remainingMonth <= 0) {
-                  // No more installments needed.
-                  order.status = 'completed';
-                  order.nextBillingDate = null; // or leave a final record as needed.
-                  order.recurrentToken = null;
-                } else {
-                  // Payment succeeded – set status to active, regardless of previous status.
-                  order.status = 'active';
-                  // Set nextBillingDate one month from the current nextBillingDate.
-                  const nextBilling = getNextBillingDate(order.nextBillingDate);
-                  order.nextBillingDate = nextBilling;
-                }
-              } else {
-                order.remainingMonth = 0;
-                order.status = 'completed';
-                order.nextBillingDate = null;
-                order.recurrentToken = null;
-              }
-
-              await order.save();
-            } else {
-              // Payment failed.
-              this.logger.error(`Order #${order.id} payment failed.`);
-              await this.paymentModel.create({
-                orderId: order.id,
-                amount,
-                currency: 'KZT',
-                status: 'failed',
-                paymentDate: new Date(),
-              });
-
-              // Set nextBillingDate to tomorrow.
-              const tomorrow = new Date();
-              tomorrow.setDate(tomorrow.getDate() + 1);
-              order.nextBillingDate = tomorrow.toISOString().split('T')[0];
-              order.status = 'past_due';
-              await order.save();
-            }
-          } catch (err) {
-            this.logger.error(`Error charging order #${order.id}: ${err}`);
-
-            await this.paymentModel.create({
-              orderId: order.id,
-              amount,
-              currency: 'KZT',
-              status: 'failed',
-              paymentDate: new Date(),
-            });
-
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            order.nextBillingDate = tomorrow.toISOString().split('T')[0];
-            order.status = 'past_due';
-            await order.save();
-          }
+      for (const order of dueOrders) {
+        const scheduledDate = new Date(order.nextBillingDate);
+        if (isNaN(scheduledDate.getTime())) {
+          this.logger.error(
+            `Order #${order.id}: invalid nextBillingDate (${order.nextBillingDate})`
+          );
+          continue;
         }
-      } catch (err) {
-        this.logger.error(`handleRecurrentPayments error: ${err}`);
+
+        const daysPast = Math.floor(
+          (Date.now() - scheduledDate.getTime()) / MS_PER_DAY
+        );
+        if (order.status === 'past_due' && daysPast >= 10) {
+          this.logger.warn(
+            `Order #${order.id} has been past due for ${daysPast} days — cancelling subscription.`
+          );
+          order.status = 'cancelled';
+          order.remainingMonth = 0;
+          order.nextBillingDate = null;
+          order.recurrentToken = null;
+          await order.save();
+          continue;
+        }
+
+        const amount = Number(order.monthlyPrice) || 0;
+
+        try {
+          const result = await this.paymentService.chargeRecurrent(
+            order.recurrentToken!,
+            amount,
+          );
+
+          // 5) Normalize success check
+          const isSuccess =
+            result.status === 'success'   ||
+            result.status === 'succeeded'
+
+          if (!isSuccess) throw new Error('payment not successful');
+
+          // 6) Record successful payment
+          await this.paymentModel.create({
+            orderId:       order.id,
+            amount,
+            currency:      'KZT',
+            status:        'success',
+            paymentDate:   new Date(),
+            transactionId: result.paymentId,
+          });
+
+          // 7) Advance subscription
+          order.remainingMonth = Math.max(0, order.remainingMonth! - 1);
+          order.status         = order.remainingMonth! > 0 ? 'active' : 'completed';
+          order.nextBillingDate = getNextBillingDate(order.nextBillingDate);
+          if (order.remainingMonth === 0) {
+            order.recurrentToken = null;
+          }
+
+          await order.save();
+          this.logger.log(`✅ Order #${order.id}: payment succeeded`);
+        } catch (err: any) {
+          // 8) Record failure and mark past_due
+          await this.paymentModel.create({
+            orderId:     order.id,
+            amount,
+            currency:    'KZT',
+            status:      'failed',
+            paymentDate: new Date(),
+          });
+
+          order.status = 'past_due';
+          // nextBillingDate remains unchanged so it'll retry tomorrow
+          await order.save();
+          this.logger.error(
+            `❌ Order #${order.id}: payment failed (${err.message})`
+          );
+        }
       }
     }
 

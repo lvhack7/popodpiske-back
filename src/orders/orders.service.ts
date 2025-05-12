@@ -108,6 +108,9 @@ export class OrdersService {
         }
 
         order.status = "cancelled"
+        order.recurrentToken = null
+        order.remainingMonth = 0
+        order.nextBillingDate = null
         await order.save()
     }
 
