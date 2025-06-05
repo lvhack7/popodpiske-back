@@ -9,9 +9,9 @@ export class PaymentsController {
         private readonly scheduleService: SchedulePaymentService
     ) {}
 
-    @Public()
-    @Get('run-recurrent/:id')
-    async runRecurrentPaymentForOrder(@Param('id') orderId: number) {
-        return await this.scheduleService.runRecurrentPaymentForOrder(orderId);
-    }
+    // @Public()
+    // @Get('run-recurrent/:id')
+    // async runRecurrentPaymentForOrder(@Param('id') orderId: number) {
+    //     return await this.scheduleService.runRecurrentPaymentForOrder(orderId);
+    // }
 }
