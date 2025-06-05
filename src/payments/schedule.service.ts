@@ -51,12 +51,12 @@ export class SchedulePaymentService {
           const result = await this.paymentService.chargeRecurrent(
             order.recurrentToken,
             amount,
-              // or any unique ID recognized by Paysage
           );
-          console.log("RESULT: ", result)
+          this.logger.log("RESULT: ", result)
           // result should have something like { status: 'success' | 'fail' }
           if (result.status === 'success') {
             // a) Create a payment record
+            order.status = 'active'; // Ensure order is marked as active
             await this.paymentModel.create({
               orderId: order.id,
               amount,
@@ -73,13 +73,7 @@ export class SchedulePaymentService {
             if (order.remainingMonth <= 0) {
               order.status = 'completed';
               order.nextBillingDate = null;
-            } else {
-              // Optionally set the nextBillingDate if you want 
-              // to keep the monthly cycle going
-              const nextDate = new Date();
-              nextDate.setMonth(nextDate.getMonth() + 1);
-              order.nextBillingDate = nextDate.toISOString().split('T')[0];
-            }
+            } 
             await order.save();
           } else {
             // Payment failed or some error
@@ -94,11 +88,6 @@ export class SchedulePaymentService {
     
             // Mark the order as 'past_due' or 'failed'
             order.status = 'past_due';
-            // Possibly move nextBillingDate to tomorrow if you want a retry
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            order.nextBillingDate = tomorrow.toISOString().split('T')[0];
-    
             await order.save();
           }
         } catch (err) {
